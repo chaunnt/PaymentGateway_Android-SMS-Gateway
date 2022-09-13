@@ -1,6 +1,6 @@
 package com.ibnux.smsgateway.layanan;
 
-import static com.ibnux.smsgateway.layanan.PushService.writeLog;
+//import static com.ibnux.smsgateway.layanan.PushService.writeLog;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,6 +10,13 @@ import android.os.AsyncTask;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
 import android.util.Log;
+import android.view.View;
+
+import com.ibnux.smsgateway.LoginActivity;
+import com.ibnux.smsgateway.MainActivity;
+import com.ibnux.smsgateway.Utils.APIManager;
+import com.ibnux.smsgateway.data.CreateSmsResponse;
+import com.ibnux.smsgateway.data.LoginResponse;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -21,6 +28,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class SmsListener extends BroadcastReceiver {
 
@@ -35,17 +46,18 @@ public class SmsListener extends BroadcastReceiver {
                 String messageBody = smsMessage.getMessageBody();
                 Log.i("SMS From", messageFrom);
                 Log.i("SMS Body", messageBody);
-                writeLog("SMS: RECEIVED : " + messageFrom + " " + messageBody,context);
-                if(url!=null){
-                    if(sp.getBoolean("gateway_on",true)) {
-                        sendPOST(url, messageFrom, messageBody,"received",context);
-                    }else{
-                        writeLog("GATEWAY OFF: SMS NOT POSTED TO SERVER", context);
-                    }
+//                writeLog("SMS: RECEIVED : " + messageFrom + " " + messageBody,context);
+                sendPOST(url, messageFrom, messageBody,"received",context);
 
-                }else{
-                    Log.i("SMS URL", "URL not SET");
-                }
+//                if(url!=null){
+//                    if(sp.getBoolean("gateway_on",true)) {
+//                        sendPOST(url, messageFrom, messageBody,"received",context);
+//                    }else{
+////                        writeLog("GATEWAY OFF: SMS NOT POSTED TO SERVER", context);
+//                    }
+//                }else{
+//                    Log.i("SMS URL", "URL not SET");
+//                }
             }
         }
     }
@@ -102,24 +114,41 @@ public class SmsListener extends BroadcastReceiver {
 
         @Override
         protected void onPostExecute(String response) {
-            writeLog(response,null);
+//            writeLog(response,null);
         }
     }
 
 
     public static void sendPOST(String urlPost,String from, String msg,String tipe,Context context){
-        if(urlPost==null) return;
-        if(from.isEmpty()) return;
-        if(!urlPost.startsWith("http")) return;
+        Log.d("DATA_TEST: sendPOST: ", from + "====" + msg);
+
+//        if(urlPost==null) return;
+//        if(from.isEmpty()) return;
+//        if(!urlPost.startsWith("http")) return;
         try {
-            new postDataTask().execute(urlPost,
-                    "number="+URLEncoder.encode(from, "UTF-8")+
-                            "&message="+URLEncoder.encode(msg, "UTF-8")+
-                            "&type="+URLEncoder.encode(tipe, "UTF-8")
-            );
+//            new postDataTask().execute(urlPost,
+//                    "number="+URLEncoder.encode(from, "UTF-8")+
+//                            "&message="+URLEncoder.encode(msg, "UTF-8")+
+//                            "&type="+URLEncoder.encode(tipe, "UTF-8")
+//            );
+            SharedPreferences sp = context.getSharedPreferences("pref",0);
+            String userToken = sp.getString("user_token",null);
+            APIManager.getInstance(context).createSms(msg, from, userToken, new Callback<CreateSmsResponse>() {
+                @Override
+                public void onResponse(Call<CreateSmsResponse> call, Response<CreateSmsResponse> response) {
+                    Log.d("DATA_TEST: onResponse: ", response.body().getStatusCode() + "");
+                }
+
+                @Override
+                public void onFailure(Call<CreateSmsResponse> call, Throwable t) {
+                    Log.d("DATA_TEST: onFailure: ", t.toString());
+
+
+                }
+            });
         }catch (Exception e){
             e.printStackTrace();
-            writeLog("SMS: POST FAILED : "+urlPost+" : "+e.getMessage(),context);
+//            writeLog("SMS: POST FAILED : "+urlPost+" : "+e.getMessage(),context);
         }
     }
 

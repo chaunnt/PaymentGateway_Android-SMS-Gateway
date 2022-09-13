@@ -38,12 +38,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.ibnux.smsgateway.Utils.APIManager;
 import com.ibnux.smsgateway.Utils.Fungsi;
+import com.ibnux.smsgateway.Utils.Utils;
+import com.ibnux.smsgateway.data.CreateSmsResponse;
 import com.ibnux.smsgateway.data.LogAdapter;
 import com.ibnux.smsgateway.data.LogLine;
 import com.ibnux.smsgateway.data.PaginationListener;
 import com.ibnux.smsgateway.layanan.BackgroundService;
-import com.ibnux.smsgateway.layanan.PushService;
+//import com.ibnux.smsgateway.layanan.PushService;
 import com.ibnux.smsgateway.layanan.UssdService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -53,6 +56,10 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import java.util.List;
 import java.util.UUID;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
     private boolean serviceActive = false;
@@ -73,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         swipe = findViewById(R.id.swipe);
         info = findViewById(R.id.text);
         info.setText("Click Me to Show Configuration");
+
         info.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -192,140 +200,140 @@ public class MainActivity extends AppCompatActivity {
         },3000);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        MenuItem menuItem = menu.findItem(R.id.menu_gateway_switch);
-        View view = MenuItemCompat.getActionView(menuItem);
-        Switch switcha = view.findViewById(R.id.switchForActionBar);
-        switcha.setChecked(getSharedPreferences("pref",0).getBoolean("gateway_on",true));
-        switcha.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                getSharedPreferences("pref",0).edit().putBoolean("gateway_on",isChecked).apply();
-                if(!isChecked){
-                    Intent intent = new Intent("BackgroundService");
-                    intent.putExtra("kill",true);
-                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-                    Toast.makeText(MainActivity.this,"Gateway OFF",Toast.LENGTH_LONG).show();
-                }else{
-                    checkServices();
-                    Toast.makeText(MainActivity.this,"Gateway ON",Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-
-            case R.id.menu_change_expired:
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Change expired, by seconds");
-                builder.setMessage("If you use Md5 for secret with time, if time expired, it will not send SMS");
-                final EditText input = new EditText(this);
-                input.setText(getSharedPreferences("pref",0).getInt("expired",3600)+"");
-                input.setMaxLines(1);
-                input.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_TEXT_VARIATION_PHONETIC);
-                builder.setView(input);
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String ex = input.getText().toString();
-                        try{
-                            int exi = Integer.parseInt(ex);
-                            if(exi<5){
-                                exi = 5;
-                            }
-                            getSharedPreferences("pref",0).edit().putInt("expired", exi).commit();
-                            Toast.makeText(MainActivity.this,"Expired changed",Toast.LENGTH_LONG).show();
-                        }catch (Exception e){
-                            //not numeric
-                        }
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                builder.show();
-                return true;
-            case R.id.menu_change_secret:
-                new AlertDialog.Builder(this)
-                        .setTitle("Change Secret")
-                        .setMessage("This will denied previous secret, every sms with previous secret ")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                getSharedPreferences("pref",0).edit().putString("secret", UUID.randomUUID().toString()).commit();
-                                updateInfo();
-                                Toast.makeText(MainActivity.this,"Secret changed",Toast.LENGTH_LONG).show();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-                return true;
-            case R.id.menu_set_url:
-                AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
-                builder2.setTitle("Change URL for receiving SMS");
-                builder2.setMessage("Data will send using POST with parameter number and message and type=received/sent/delivered/ussd");
-                final EditText input2 = new EditText(this);
-                input2.setText(getSharedPreferences("pref",0).getString("urlPost",""));
-                input2.setHint("https://sms.ibnux.net");
-                input2.setMaxLines(1);
-                input2.setInputType(InputType.TYPE_TEXT_VARIATION_URI | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
-                builder2.setView(input2);
-                builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        String urlPost = input2.getText().toString();
-                        getSharedPreferences("pref",0).edit().putString("urlPost", urlPost).commit();
-                        Toast.makeText(MainActivity.this,"SERVER URL changed",Toast.LENGTH_LONG).show();
-                    }
-                });
-                builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-
-                builder2.show();
-                return true;
-            case R.id.menu_clear_logs:
-                new AlertDialog.Builder(this)
-                        .setTitle("Clear Logs")
-                        .setMessage("Are you sure?")
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                ObjectBox.get().boxFor(LogLine.class).removeAll();
-                                adapter.reload();
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null)
-                        .setIcon(android.R.drawable.ic_dialog_alert)
-                        .show();
-                return true;
-            case R.id.menu_ussd_set:
-                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-                startActivity(intent);
-//              Toast.makeText(this,"Sudah Aktif",Toast.LENGTH_LONG).show();
-                return true;
-            case R.id.menu_ussd_test:
-                callUssd();
-                return true;
-            case R.id.menu_battery_optimization:
-                startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:"+BuildConfig.APPLICATION_ID)));
-                return true;
-        }
-        return false;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        MenuInflater inflater = getMenuInflater();
+//        inflater.inflate(R.menu.main_menu, menu);
+//        MenuItem menuItem = menu.findItem(R.id.menu_gateway_switch);
+//        View view = MenuItemCompat.getActionView(menuItem);
+//        Switch switcha = view.findViewById(R.id.switchForActionBar);
+//        switcha.setChecked(getSharedPreferences("pref",0).getBoolean("gateway_on",true));
+//        switcha.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+//            @Override
+//            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+//                getSharedPreferences("pref",0).edit().putBoolean("gateway_on",isChecked).apply();
+//                if(!isChecked){
+//                    Intent intent = new Intent("BackgroundService");
+//                    intent.putExtra("kill",true);
+//                    LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+//                    Toast.makeText(MainActivity.this,"Gateway OFF",Toast.LENGTH_LONG).show();
+//                }else{
+//                    checkServices();
+//                    Toast.makeText(MainActivity.this,"Gateway ON",Toast.LENGTH_LONG).show();
+//                }
+//            }
+//        });
+//        return true;
+//    }
+//
+//    @Override
+//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+//        switch (item.getItemId()) {
+//
+//            case R.id.menu_change_expired:
+//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                builder.setTitle("Change expired, by seconds");
+//                builder.setMessage("If you use Md5 for secret with time, if time expired, it will not send SMS");
+//                final EditText input = new EditText(this);
+//                input.setText(getSharedPreferences("pref",0).getInt("expired",3600)+"");
+//                input.setMaxLines(1);
+//                input.setInputType(InputType.TYPE_CLASS_PHONE | InputType.TYPE_TEXT_VARIATION_PHONETIC);
+//                builder.setView(input);
+//                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String ex = input.getText().toString();
+//                        try{
+//                            int exi = Integer.parseInt(ex);
+//                            if(exi<5){
+//                                exi = 5;
+//                            }
+//                            getSharedPreferences("pref",0).edit().putInt("expired", exi).commit();
+//                            Toast.makeText(MainActivity.this,"Expired changed",Toast.LENGTH_LONG).show();
+//                        }catch (Exception e){
+//                            //not numeric
+//                        }
+//                    }
+//                });
+//                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+//
+//                builder.show();
+//                return true;
+//            case R.id.menu_change_secret:
+//                new AlertDialog.Builder(this)
+//                        .setTitle("Change Secret")
+//                        .setMessage("This will denied previous secret, every sms with previous secret ")
+//                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                getSharedPreferences("pref",0).edit().putString("secret", UUID.randomUUID().toString()).commit();
+//                                updateInfo();
+//                                Toast.makeText(MainActivity.this,"Secret changed",Toast.LENGTH_LONG).show();
+//                            }
+//                        })
+//                        .setNegativeButton(android.R.string.no, null)
+//                        .setIcon(android.R.drawable.ic_dialog_alert)
+//                        .show();
+//                return true;
+//            case R.id.menu_set_url:
+//                AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
+//                builder2.setTitle("Change URL for receiving SMS");
+//                builder2.setMessage("Data will send using POST with parameter number and message and type=received/sent/delivered/ussd");
+//                final EditText input2 = new EditText(this);
+//                input2.setText(getSharedPreferences("pref",0).getString("urlPost",""));
+//                input2.setHint("https://sms.ibnux.net");
+//                input2.setMaxLines(1);
+//                input2.setInputType(InputType.TYPE_TEXT_VARIATION_URI | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT);
+//                builder2.setView(input2);
+//                builder2.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        String urlPost = input2.getText().toString();
+//                        getSharedPreferences("pref",0).edit().putString("urlPost", urlPost).commit();
+//                        Toast.makeText(MainActivity.this,"SERVER URL changed",Toast.LENGTH_LONG).show();
+//                    }
+//                });
+//                builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.cancel();
+//                    }
+//                });
+//
+//                builder2.show();
+//                return true;
+//            case R.id.menu_clear_logs:
+//                new AlertDialog.Builder(this)
+//                        .setTitle("Clear Logs")
+//                        .setMessage("Are you sure?")
+//                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                ObjectBox.get().boxFor(LogLine.class).removeAll();
+//                                adapter.reload();
+//                            }
+//                        })
+//                        .setNegativeButton(android.R.string.no, null)
+//                        .setIcon(android.R.drawable.ic_dialog_alert)
+//                        .show();
+//                return true;
+//            case R.id.menu_ussd_set:
+//                Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
+//                startActivity(intent);
+////              Toast.makeText(this,"Sudah Aktif",Toast.LENGTH_LONG).show();
+//                return true;
+//            case R.id.menu_ussd_test:
+//                callUssd();
+//                return true;
+//            case R.id.menu_battery_optimization:
+//                startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:"+BuildConfig.APPLICATION_ID)));
+//                return true;
+//        }
+//        return false;
+//    }
 
     public void callUssd(){
         AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
@@ -340,9 +348,9 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 String ussd = input2.getText().toString();
                 Log.d("ussd","tel:"+ussd);
-                if(PushService.context==null)
-                    PushService.context = Aplikasi.app;
-                PushService.queueUssd(ussd,1);
+//                if(PushService.context==null)
+//                    PushService.context = Aplikasi.app;
+//                PushService.queueUssd(ussd,1);
             }
         });
         builder2.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -388,4 +396,5 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
+
 }

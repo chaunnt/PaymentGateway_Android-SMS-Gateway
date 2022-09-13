@@ -7,6 +7,8 @@ package com.ibnux.smsgateway;
 import android.app.Application;
 import android.content.SharedPreferences;
 
+import com.ibnux.smsgateway.Utils.APIManager;
+
 import java.util.UUID;
 
 public class Aplikasi extends Application {
@@ -20,6 +22,7 @@ public class Aplikasi extends Application {
         super.onCreate();
         this.app = this;
         ObjectBox.init(this);
+        APIManager.init(this);
         sp = getSharedPreferences("pref",0);
         secret = sp.getString("secret",null);
         if(secret==null){

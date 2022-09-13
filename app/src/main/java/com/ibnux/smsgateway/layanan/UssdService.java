@@ -73,16 +73,16 @@ public class UssdService extends AccessibilityService {
         // Close dialog
         performGlobalAction(GLOBAL_ACTION_BACK); // This works on 4.1+ only
         Fungsi.log(TAG, text);
-        if(PushService.current!=null){
-            PushService.writeLog("USSD Received: " + text, this);
-            SmsListener.sendPOST(getSharedPreferences("pref", 0).getString("urlPost", null),
-                    PushService.current.to+PushService.current.sim, text, "ussd", this);
-        }else {
-            PushService.writeLog("USSD Received: " + text, this);
-            SmsListener.sendPOST(getSharedPreferences("pref", 0).getString("urlPost", null),
-                    "ussd", text, "ussd", this);
-        }
-        PushService.runUssd();
+//        if(PushService.current!=null){
+//            PushService.writeLog("USSD Received: " + text, this);
+//            SmsListener.sendPOST(getSharedPreferences("pref", 0).getString("urlPost", null),
+//                    PushService.current.to+PushService.current.sim, text, "ussd", this);
+//        }else {
+//            PushService.writeLog("USSD Received: " + text, this);
+//            SmsListener.sendPOST(getSharedPreferences("pref", 0).getString("urlPost", null),
+//                    "ussd", text, "ussd", this);
+//        }
+//        PushService.runUssd();
     }
 
     private String processUSSDText(List<CharSequence> eventText) {

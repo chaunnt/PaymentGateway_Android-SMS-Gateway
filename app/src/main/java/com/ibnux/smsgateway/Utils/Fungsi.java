@@ -26,7 +26,7 @@ import androidx.core.app.NotificationCompat;
 import com.ibnux.smsgateway.Aplikasi;
 import com.ibnux.smsgateway.MainActivity;
 import com.ibnux.smsgateway.R;
-import com.ibnux.smsgateway.layanan.PushService;
+//import com.ibnux.smsgateway.layanan.PushService;
 import com.ibnux.smsgateway.layanan.UssdService;
 
 import java.security.MessageDigest;
@@ -87,12 +87,12 @@ public class Fungsi {
                 values.put("body", message);
                 Aplikasi.app.getContentResolver()
                         .insert(Uri.parse("content://sms/sent"), values);
-                PushService.writeLog("SUBMIT SMS SUCCESS: " + number, cx);
+//                PushService.writeLog("SUBMIT SMS SUCCESS: " + number, cx);
             }
             catch (Exception ex)
             {
                 ex.printStackTrace();
-                PushService.writeLog("SEND FAILED: " + number + " " + message+"\n\n"+ex.getMessage(), cx);
+//                PushService.writeLog("SEND FAILED: " + number + " " + message+"\n\n"+ex.getMessage(), cx);
             }
         }
     }
