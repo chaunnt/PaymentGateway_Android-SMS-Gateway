@@ -1,93 +1,46 @@
+# EducationApp
 
-# Android SMS Gateway  
+ Android Education App adding Design Course App UI
+ 
+ Base ProjectDesign: https://appsnipp.com/android-education-app-free-ui-with-dark-mode/
+ 
+ Original design credits and whatever https://dribbble.com/shots/6482664-Design-Course-App-UI
+ 
+ Design is in *Courses* item
+ _Find your match added_ design added in *Seach* option
   
-This is recreate from [Old SMS Gateway](https://github.com/anjlab/android-sms-gateway)  
-now using Firebase  
-to turn my android as sms sender
+  ## Libraries we use
 
-# HOW IT WORKS
+This module use the following libraries:
 
-Sending SMS
+- [Androidx](https://developer.android.com/jetpack/androidx)
+- [ViewPager2](https://developer.android.com/jetpack/androidx/releases/viewpager2)
+- [LiveData](https://developer.android.com/topic/libraries/architecture/livedata)
+- [Navigation](https://developer.android.com/guide/navigation)
+- [ViewBinding](https://developer.android.com/topic/libraries/view-binding)
+- [Google Material Design](https://material.io/develop/android/docs/getting-started)
 
-1. You send data to sms.ibnux.net (or your server)
-2. Server will send push notification
-3. App receive push notification, and route it to sms
-4. App receive sent notification, and post it to your server
-5. App receive delivered notification, and post it to your server
-
-RECEIVE SMS
-1. App receive SMS
-2. App send it to your server
   
-# HOW TO USE?  
-  
-Download APK from [release](https://github.com/ibnux/Android-SMS-Gateway/releases) page  
-  then open https://sms.ibnux.net/ to learn how to send sms
+ ## 📸 Screenshots
 
-you can find backend folder for server side in this source
+**Click the image below to enlarge.**
 
-to compile yourself, you need your own Firebase
+<table>
+  <tr>
+     <td></td>
+     <td></td>
+     <td></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/init_view.JPG" width=270 height=auto></td>
+    <td><img src="screenshots/screenshot-1587165564580.jpg" width=270 height=auto></td>
+    <td><img src="screenshots/screenshot-1597998427057.jpg" width=270 height=auto></td>
+  </tr>
+ </table>
 
-# FEATURES
+## Video Demo
 
-- SENDING SMS
-- RECEIVE SMS to SERVER
-- SENT NOTIFICATION to SERVER
-- DELIVERED NOTIFICATION to SERVER
-- USSD
-- MULTIPLE SIMCARD
-- RETRY SMS FAILED TO SENT 3 TIMES
 
-## USSD Request
+https://github.com/rogergcc/AndroidEducationApp/assets/18008332/8dbedab4-fa1e-4257-82ec-aef900fc8a04
 
-Not all phone and carrier work with this, this feature need accessibility to read message and auto close USSD dialog, but some device failed to close Dialog, i use samsung S10 Lite and it cannot close dialog
 
-## MULTIPLE SIMCARD
-
-i think not all phone will work too, because of different of API for some OS which vendor has modification
-
-# Install on your own Server?
-
-You need to understand how to build android Apps, and compile your own version.
-
-Create Firebase project, add apps to project to get google-services.json
-
-Add server key to **backend** script
-
-You will see MyObjectBox error, just build it once, it will create automatically, read in [here](https://docs.objectbox.io/getting-started#generate-objectbox-code)
-
-***
-
-## Traktir @ibnux
-
-[<img src="https://ibnux.github.io/KaryaKarsa-button/karyaKarsaButton.png" width="128">](https://karyakarsa.com/ibnux)
-
-[<img src="https://ibnux.github.io/Trakteer-button/trakteer_button.png" width="120">](https://trakteer.id/ibnux)
-
-## DONATE @ibnux
-
-[paypal.me/ibnux](https://paypal.me/ibnux)
-
-# LICENSE  
-## Apache License 2.0  
-  
-Permissions  
-  
-    ✓ Commercial use  
-    ✓ Distribution  
-    ✓ Modification  
-    ✓ Patent use  
-    ✓ Private use  
-  
-Conditions  
-  
-    License and copyright notice  
-    State changes  
-  
-Limitations  
-  
-    No Liability  
-    No Trademark use  
-    No Warranty  
-  
-you can find license file inside folder
