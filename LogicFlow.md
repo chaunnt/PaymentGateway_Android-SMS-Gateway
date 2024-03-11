@@ -1,0 +1,13 @@
+Luồng hoạt động app như sau: 
+1. Vào app webview sẽ mở link https://cdn-remote-vietcredit.vay3s.com/User/getUserRobotToken (phần domain thì dùng ENV nhé)
+2. tab 1: webview sẽ mở ra trang token, có token trên url. Ví dụ: https://cdn-remote-vietcredit.vay3s.com/User/user/loginSuccess?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoic3RyaW5nIiwiZmlyc3ROYW1lIjpudWxsLCJsYXN0TmFtZSI6bnVsbCwiZW1haWwiOm51bGwsInJlZmVyVXNlcklkIjpudWxsLCJyZWZlclVzZXIiOm51bGwsInBhc3N3b3JkIjoiOWQ4ZTA0ODNkNWE3MWE3M2Q0Y2Y3NjJkM2RmZGQzMGQ1ZjQ0MWE4NWEwNjBkMzMzNWMwYzQ5NzlmZjNlMDUzMCIsInNvY21uZCI6bnVsbCwiY21uZHRydW9jIjpudWxsLCJjbW5kc2F1IjpudWxsLCJjbW5kbmd1b2kiOm51bGwsImNhbGxUb2tlbiI6bnVsbCwibWVtYmVyTGV2ZWxOYW1lIjoiTWVtYmVyIiwiaXNWZXJpZmllZCI6MCwiaXNWZXJpZmllZEVtYWlsIjowLCJpc1ZlcmlmaWVkUGhvbmVOdW1iZXIiOm51bGwsImFjdGl2ZSI6MSwibGltaXRXaXRoZHJhd0RhaWx5IjoxMDAwMDAwLCJpcEFkZHJlc3MiOm51bGwsInBob25lTnVtYmVyIjpudWxsLCJsYXN0QWN0aXZlQXQiOm51bGwsInR3b0ZBQ29kZSI6bnVsbCwiYWN0aXZlT1RQQ29kZSI6bnVsbCwiYWN0aXZlT1RQQXQiOm51bGwsInVzZXJBdmF0YXIiOm51bGwsInRlbGVncmFtSWQiOm51bGwsImZhY2Vib29rSWQiOm51bGwsImFwcGxlSWQiOm51bGwsInphbG9JZCI6bnVsbCwibm90ZSI6bnVsbCwibWVtYmVyUmVmZXJJZEYxIjpudWxsLCJtZW1iZXJSZWZlcklkRjIiOm51bGwsIm1lbWJlclJlZmVySWRGMyI6bnVsbCwibWVtYmVyUmVmZXJJZEY0IjpudWxsLCJtZW1iZXJSZWZlcklkRjUiOm51bGwsIm1lbWJlclJlZmVySWRGNiI6bnVsbCwibWVtYmVyUmVmZXJJZEY3IjpudWxsLCJtZW1iZXJSZWZlcklkRjgiOm51bGwsIm1lbWJlclJlZmVySWRGOSI6bnVsbCwibWVtYmVyUmVmZXJJZEYxMCI6bnVsbCwic290YWlraG9hbiI6bnVsbCwidGVudGFpa2hvYW4iOm51bGwsInRlbm5nYW5oYW5nIjpudWxsLCJkaWFjaGl2aVVTRFQiOm51bGwsImRpYWNoaXZpQlRDIjpudWxsLCJ1cGRhdGVkQXQiOiIyMDI0LTAzLTA0VDExOjAxOjA3LjAwMFoiLCJjcmVhdGVkQXQiOiIyMDI0LTAzLTA0VDExOjAxOjA3LjAwMFoiLCJpc0hpZGRlbiI6MCwiaXNEZWxldGVkIjowLCJ0b2tlblR5cGUiOiJub3JtYWxVc2VyIiwiaWF0IjoxNzA5NTUyMDg1LCJleHAiOjE3MDk2Mzg0ODV9.nKDRBdOPdDwqqB4D2cWKyqLaOu9t7TFpurLv8YkU3sE
+3. Webview sẽ bắt sự thay đổi url để kiểm tra > có token thì lấy token lưu vào local để sử dụng để sync
+4. tab 2: Xác thực 
+5. bấm "Xác thực SMS" trước . bấm nút này thì xuất hiện popup xin quyền "Ứng dụng cần truy cập SMS của bạn để xác thực số điện thoại". Đồng ý thì có quyền đọc SMS thì làm bước tiếp theo
+6. đọc được SMS
+7. gọi API để gửi SMS lên /SMSMessage/robot/insert . body gửi lên là code cũ đã có, hoặc nếu có thay đổi thì gửi lại mình body để mình cập nhật API
+8. Danh bạ và cuộc gọi làm tương tự từ 5-7 nhưng khác API
+API danh bạ: /AppUserContact/user/insertContact
+API Cuộc gọi: /AppUserCallLog/user/insertCallLog
+body gửi lên thì tham khảo swaggerUI: https://cdn-remote-vietcredit.vay3s.com/documentation
+9. xử lý background worker tiếp 
