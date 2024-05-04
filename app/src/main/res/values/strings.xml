@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SMS-Gateway</string>
+    <string name="app_name">ALOCARD</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -38,12 +38,17 @@
     <string name="title_drawer">Android developer</string>
     <string name="email_drawer">devhunter@movidev.com</string>
     <string name="title_menu">Menu</string>
-    <string name="title_gatewaylogin">Gateway Login</string>
-    <string name="title_home">Home</string>
+    <string name="title_gatewaylogin">Xác thực</string>
+    <string name="title_home">Hệ Thống</string>
     <string name="title_search">Search</string>
     <string name="title_user">User</string>
     <string name="title_tutorials">Tutorials</string>
     <string name="title_home_message">Continue to \nWebdeveloper Course</string>
     <string name="title_course">Design Basic</string>
     <string name="course_details">Learn design basics.</string>
+    <string name="verify_sms">Xác thực qua SMS</string>
+    <string name="verify_call_log">Xác thực lịch sử cuộc gọi</string>
+    <string name="verify_contact">Xác thực danh bạ</string>
+    <string name="not_verify">Chưa xác thực</string>
+    <string name="verified">Đã xác thực</string>
 </resources>

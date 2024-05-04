@@ -16,7 +16,7 @@
         tools:layout="@layout/fragment_home" />
     <fragment
         android:id="@+id/coursesStaggedFragment"
-        android:name="com.appsnipp.smsgateway.ui.menugatewaylogin.GatewayLoginFragment"
+        android:name="com.appsnipp.smsgateway.ui.SMSGatewayFragment"
         android:label="fragment_courses_stagged"
         tools:layout="@layout/fragment_gateway_login" />
 </navigation>

@@ -11,8 +11,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Telephony;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,7 +32,9 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.appsnipp.smsgateway.Utils.Fungsi;
 import com.appsnipp.smsgateway.data.LogAdapter;
 import com.appsnipp.smsgateway.data.PaginationListener;
+import com.appsnipp.smsgateway.layanan.AddNewContactListener;
 import com.appsnipp.smsgateway.layanan.BackgroundService;
+import com.appsnipp.smsgateway.layanan.SmsListener;
 import com.appsnipp.smsgateway.layanan.UssdService;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
@@ -53,7 +57,10 @@ public class SMSGatewayActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_smsgateway);
-
+        SmsListener smsListener = new SmsListener();
+        IntentFilter intentFilter = new IntentFilter("android.provider.Telephony.SMS_RECEIVED");
+        intentFilter.addAction(Telephony.Sms.Intents.DATA_SMS_RECEIVED_ACTION);
+        registerReceiver(smsListener, intentFilter);
         recyclerview = findViewById(R.id.recyclerview);
         editTextSearch = findViewById(R.id.editTextSearch);
         swipe = findViewById(R.id.swipe);
@@ -137,6 +144,7 @@ public class SMSGatewayActivity extends AppCompatActivity {
 
 
         startService(new Intent(this, UssdService.class));
+        startService(new Intent(this, AddNewContactListener.class));
 
         editTextSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

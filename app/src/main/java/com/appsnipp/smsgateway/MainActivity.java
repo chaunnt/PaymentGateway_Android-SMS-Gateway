@@ -18,6 +18,9 @@ import androidx.navigation.ui.NavigationUI;
 import com.appsnipp.smsgateway.databinding.ActivityMainBinding;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
+import com.microsoft.appcenter.AppCenter;
+import com.microsoft.appcenter.analytics.Analytics;
+import com.microsoft.appcenter.crashes.Crashes;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -29,7 +32,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        AppCenter.start(getApplication(), "0f23c541-ea83-43df-ac09-3ae1ba0735b1",
+                Analytics.class, Crashes.class);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
 
         View view = binding.getRoot();

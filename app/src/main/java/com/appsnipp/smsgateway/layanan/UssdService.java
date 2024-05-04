@@ -4,6 +4,7 @@ import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Intent;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Toast;
@@ -19,6 +20,7 @@ public class UssdService extends AccessibilityService {
 
     @Override
     public void onCreate() {
+        Log.d(TAG, "onCreate: ");
         Fungsi.log(TAG,"UssdService onCreate");
     }
 

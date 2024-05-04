@@ -8,7 +8,7 @@
     tools:context=".SMSGatewayActivity">
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:visibility="gone"
+        android:visibility="visible"
         android:id="@+id/swipe"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -27,7 +27,7 @@
                 android:linksClickable="true"
                 android:text="Hello World!"
                 android:textIsSelectable="true"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <EditText
                 android:id="@+id/editTextSearch"
@@ -40,11 +40,11 @@
                 android:inputType="textPersonName"
                 android:selectAllOnFocus="true"
                 android:textSize="12sp"
-                android:visibility="gone" />
+                android:visibility="visible" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerview"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

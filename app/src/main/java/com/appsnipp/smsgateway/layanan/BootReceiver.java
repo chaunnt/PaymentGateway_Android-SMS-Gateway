@@ -16,6 +16,7 @@ public class BootReceiver extends BroadcastReceiver {
             Intent serviceIntent = new Intent(context, BackgroundService.class);
             context.startService(serviceIntent);
             context.startService(new Intent(context, UssdService.class));
+            context.startService(new Intent(context, AddNewContactListener.class));
         }
     }
 }

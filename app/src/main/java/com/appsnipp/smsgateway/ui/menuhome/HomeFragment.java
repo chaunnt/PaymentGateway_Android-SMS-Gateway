@@ -4,7 +4,10 @@
 
 package com.appsnipp.smsgateway.ui.menuhome;
 
+import android.content.SharedPreferences;
+import android.net.UrlQuerySanitizer;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,11 +22,19 @@ import com.appsnipp.smsgateway.R;
 
 public class HomeFragment extends Fragment {
     public WebView mWebView;
+    WebViewClient mWebViewClient = new WebViewClient() {
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            super.onPageFinished(view, url);
+            UrlQuerySanitizer sanitizer = new UrlQuerySanitizer(url);
+            updateInfo(sanitizer.getValue("token"));
+        }
+    };
+
 
     public HomeFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,8 +53,14 @@ public class HomeFragment extends Fragment {
         webSettings.setJavaScriptEnabled(true);
 
         // Force links and redirects to open in the WebView instead of in a browser
-        mWebView.setWebViewClient(new WebViewClient());
-
+        mWebView.setWebViewClient(mWebViewClient);
         return view;
+    }
+
+    public void updateInfo(String token) {
+        if (getActivity() != null) {
+            SharedPreferences sp = getActivity().getSharedPreferences("pref", 0);
+            sp.edit().putString("token", token).apply();
+        }
     }
 }

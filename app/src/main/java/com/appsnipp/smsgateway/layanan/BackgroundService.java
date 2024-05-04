@@ -34,6 +34,7 @@ public class BackgroundService extends Service {
     public void onCreate() {
         Fungsi.log("BackgroundService onCreate");
         LocalBroadcastManager.getInstance(this).registerReceiver(receiver,new IntentFilter("BackgroundService"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(new SmsListener(),new IntentFilter("BackgroundService"));
     }
 
     @Override

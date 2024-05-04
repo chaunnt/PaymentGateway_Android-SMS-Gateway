@@ -38,9 +38,9 @@ public class LogAdapter extends RecyclerView.Adapter<LogAdapter.MyViewHolder> {
         smallTime = System.currentTimeMillis();
         bigTime = 0;
         if (search.length() > 0) {
-            //datas = ObjectBox.get().boxFor(LogLine.class).query().contains(LogLine_.message, search).orderDesc(LogLine_.time).build().find(offset, limit);
+            datas = ObjectBox.get().boxFor(LogLine.class).query().contains(LogLine_.message, search).orderDesc(LogLine_.time).build().find(offset, limit);
         } else {
-            //datas = ObjectBox.get().boxFor(LogLine.class).query().orderDesc(LogLine_.time).build().find(offset, limit);
+            datas = ObjectBox.get().boxFor(LogLine.class).query().orderDesc(LogLine_.time).build().find(offset, limit);
         }
         for (int n = 0; n < getItemCount(); n++) {
             if (datas.get(n).time > bigTime) {
