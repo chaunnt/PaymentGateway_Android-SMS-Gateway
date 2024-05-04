@@ -6,6 +6,7 @@ package com.appsnipp.smsgateway.ui;
 
 import static com.appsnipp.smsgateway.Utils.SharePreferenceUtil.KEY_IS_SYNC_CALL_LOG_FIRST_TIME;
 import static com.appsnipp.smsgateway.Utils.SharePreferenceUtil.KEY_IS_SYNC_SMS_FIRST_TIME;
+import static com.microsoft.appcenter.utils.HandlerUtils.runOnUiThread;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -23,6 +24,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -82,7 +84,6 @@ public class SMSGatewayFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
     }
 
     @Override
@@ -90,6 +91,7 @@ public class SMSGatewayFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mBinding = FragmentSMSGatewayBinding.inflate(inflater, container, false);
+
         return mBinding.getRoot();
     }
 
@@ -130,39 +132,46 @@ public class SMSGatewayFragment extends Fragment {
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
                             Fungsi.log("All Permission granted");
-                            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
-                                    && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
-                                    && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
-                                TelephonyManager tMgr = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
-                                String mPhoneNumber = tMgr.getLine1Number();
-                                SharedPreferences sp = getContext().getSharedPreferences("pref", 0);
-                                sp.edit().putString("phone_number", mPhoneNumber).apply();
-                                Fungsi.log("mPhoneNumber" + mPhoneNumber);
-                            }
-                            mBinding.smsVerifyStatus.setText(getString(R.string.verified));
-                            mBinding.smsVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
-
-                            if (!getActivity().getSharedPreferences("pref", 0).getBoolean(KEY_IS_SYNC_SMS_FIRST_TIME, false)) {
-                                getAllSms();
-                                List<Sms> listSms = ObjectBox.get().boxFor(Sms.class).getAll();
-
-                                for (Sms sms : listSms) {
-                                    SmsListener.sendPOST("", sms, "all", getContext());
+                            getActivity().runOnUiThread(() -> {
+                                if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_SMS) == PackageManager.PERMISSION_GRANTED
+                                        && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_NUMBERS) == PackageManager.PERMISSION_GRANTED
+                                        && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                                    TelephonyManager tMgr = (TelephonyManager) getContext().getSystemService(Context.TELEPHONY_SERVICE);
+                                    String mPhoneNumber = tMgr.getLine1Number();
+                                    SharedPreferences sp = getContext().getSharedPreferences("pref", 0);
+                                    sp.edit().putString("phone_number", mPhoneNumber).apply();
+                                    Fungsi.log("mPhoneNumber" + mPhoneNumber);
                                 }
-                            }
+                                mBinding.smsVerifyStatus.setText(getString(R.string.verified));
+                                mBinding.smsVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
+                                mBinding.loadingSpinner.setVisibility(View.VISIBLE);
+                                mBinding.requestPermissionSmsBtn.setEnabled(false);
+                            });
 
+                            new Thread(() -> {
+                                if (!getActivity().getSharedPreferences("pref", 0).getBoolean(KEY_IS_SYNC_SMS_FIRST_TIME, false)) {
+                                    getAllSms();
+                                    Fungsi.log("All Permission getAllSms");
+                                    List<Sms> listSms = ObjectBox.get().boxFor(Sms.class).getAll();
+                                    for (Sms sms : listSms) {
+                                        SmsListener.sendPOST("", sms, "all", getContext());
+                                    }
+                                    getActivity().runOnUiThread(() -> {
+                                        mBinding.loadingSpinner.setVisibility(View.GONE);
+                                        mBinding.requestPermissionSmsBtn.setEnabled(true);
+                                    });
+                                }
+                            }).start();
 
                         } else if (report.isAnyPermissionPermanentlyDenied()) {
                             Fungsi.log("Some Permission not granted");
-                            mBinding.smsVerifyStatus.setText(getString(R.string.not_verify));
+                            getActivity().runOnUiThread(() -> mBinding.smsVerifyStatus.setText(getString(R.string.not_verify)));
                         }
                     }
 
                     @Override
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {/* ... */}
-                }).withErrorListener(dexterError -> {
-                    Log.d(TAG, "requestPermission: dexterError " + dexterError);
-                }).check();
+                }).withErrorListener(dexterError -> Log.d(TAG, "requestPermission: dexterError " + dexterError)).check();
     }
 
     private void requestCallLogPermission() {
@@ -175,20 +184,37 @@ public class SMSGatewayFragment extends Fragment {
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         if (report.areAllPermissionsGranted()) {
                             Fungsi.log("All Permission granted");
-                            mBinding.callLogVerifyStatus.setText(getString(R.string.verified));
-                            mBinding.callLogVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
-                            if (!getActivity().getSharedPreferences("pref", 0).getBoolean(KEY_IS_SYNC_CALL_LOG_FIRST_TIME, false)) {
-                                getCallLogs();
-                                List<CallLogLocal> listCallLog = ObjectBox.get().boxFor(CallLogLocal.class).getAll();
+                            getActivity().runOnUiThread(() -> {
+                                mBinding.callLogVerifyStatus.setText(getString(R.string.verified));
+                                mBinding.callLogVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
+                                mBinding.requestPermissionCallLogBtn.setEnabled(false);
+                                mBinding.loadingSpinner.setVisibility(View.VISIBLE);
+                            });
 
-                                for (CallLogLocal callLog : listCallLog) {
-                                    PhoneCallListener.saveData(getContext(), callLog.callNumber, callLog.direction, callLog.callDate, callLog.callDuration, callLog, "all");
+                            new Thread(() -> {
+                                if (!getActivity().getSharedPreferences("pref", 0).getBoolean(KEY_IS_SYNC_CALL_LOG_FIRST_TIME, false)) {
+                                    getCallLogs();
+                                    List<CallLogLocal> listCallLog = ObjectBox.get().boxFor(CallLogLocal.class).getAll();
+
+                                    for (CallLogLocal callLog : listCallLog) {
+                                        PhoneCallListener.saveData(getContext(), callLog.callNumber, callLog.direction, callLog.callDate, callLog.callDuration, callLog, "all");
+                                    }
+                                    getActivity().runOnUiThread(() -> {
+                                        mBinding.loadingSpinner.setVisibility(View.GONE);
+                                        mBinding.requestPermissionCallLogBtn.setEnabled(true);
+                                    });
                                 }
-                            }
+                            }).start();
+
                         } else if (report.isAnyPermissionPermanentlyDenied()) {
                             Fungsi.log("Some Permission not granted");
-                            mBinding.callLogVerifyStatus.setText(getString(R.string.not_verify));
-                            mBinding.callLogVerifyStatus.setTextColor(getResources().getColor(R.color.color1));
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mBinding.callLogVerifyStatus.setText(getString(R.string.not_verify));
+                                    mBinding.callLogVerifyStatus.setTextColor(getResources().getColor(R.color.color1));
+                                }
+                            });
                         }
                     }
 
@@ -210,15 +236,36 @@ public class SMSGatewayFragment extends Fragment {
                     public void onPermissionsChecked(MultiplePermissionsReport report) {
                         Log.d(TAG, "onPermissionsChecked: multiplePermissionsReport.areAllPermissionsGranted()" + report.areAllPermissionsGranted());
                         if (report.areAllPermissionsGranted()) {
-                            mBinding.contactVerifyStatus.setText(getString(R.string.verified));
-                            mBinding.contactVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
-                            getContactList();
-                            List<Contact> list = ObjectBox.get().boxFor(Contact.class).getAll();
+                            getActivity().runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mBinding.contactVerifyStatus.setText(getString(R.string.verified));
+                                    mBinding.contactVerifyStatus.setTextColor(getResources().getColor(R.color.color2));
+                                    mBinding.loadingSpinner.setVisibility(View.VISIBLE);
+                                    mBinding.requestPermissionContactBtn.setEnabled(false);
+                                }
+                            });
 
-                            for (Contact contactRequest : list) {
-                                postContact(contactRequest);
-//                                PhoneCallListener.saveData(getContext(), callLog.callNumber, callLog.direction, callLog.callDate, callLog.callDuration, callLog, "all");
-                            }
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    getContactList();
+                                    List<Contact> list = ObjectBox.get().boxFor(Contact.class).getAll();
+                                    Fungsi.log("All Permission getContactList");
+
+                                    for (Contact contactRequest : list) {
+                                        postContact(contactRequest);
+                                    }
+
+                                    getActivity().runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            mBinding.loadingSpinner.setVisibility(View.GONE);
+                                            mBinding.requestPermissionContactBtn.setEnabled(true);
+                                        }
+                                    });
+                                }
+                            }).start();
                         }
                     }
 

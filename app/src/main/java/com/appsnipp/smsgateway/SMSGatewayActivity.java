@@ -4,6 +4,8 @@ package com.appsnipp.smsgateway;
  * Created by Ibnu Maksum 2020
  */
 
+import static com.appsnipp.smsgateway.ui.utils.MyUtilsApp.checkNetworkIsConnected;
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -12,6 +14,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Telephony;
@@ -22,6 +25,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -32,6 +36,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.appsnipp.smsgateway.Utils.Fungsi;
 import com.appsnipp.smsgateway.data.LogAdapter;
 import com.appsnipp.smsgateway.data.PaginationListener;
+import com.appsnipp.smsgateway.data.Sms;
 import com.appsnipp.smsgateway.layanan.AddNewContactListener;
 import com.appsnipp.smsgateway.layanan.BackgroundService;
 import com.appsnipp.smsgateway.layanan.SmsListener;

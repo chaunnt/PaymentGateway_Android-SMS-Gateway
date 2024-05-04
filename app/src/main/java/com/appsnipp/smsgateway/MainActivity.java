@@ -1,8 +1,15 @@
 package com.appsnipp.smsgateway;
 
+import static com.appsnipp.smsgateway.ui.utils.MyUtilsApp.checkInternetIsConnected;
+import static com.appsnipp.smsgateway.ui.utils.MyUtilsApp.checkNetworkIsConnected;
+
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.Network;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -15,12 +22,18 @@ import androidx.core.view.GravityCompat;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.NavigationUI;
 
+import com.appsnipp.smsgateway.data.CallLogLocal;
+import com.appsnipp.smsgateway.data.Sms;
 import com.appsnipp.smsgateway.databinding.ActivityMainBinding;
+import com.appsnipp.smsgateway.layanan.PhoneCallListener;
+import com.appsnipp.smsgateway.layanan.SmsListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
+
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -46,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
 
         setupNavigation();
+        checkNetworkIsConnected(this, callback);
     }
 
     private void setAppTheme() {
@@ -84,5 +98,29 @@ public class MainActivity extends AppCompatActivity
         binding.drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private final ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback() {
+        @Override
+        public void onAvailable(@NonNull Network network) {
+            super.onAvailable(network);
+            if(checkInternetIsConnected()) {
+                List<Sms> smsList = ObjectBox.get().boxFor(Sms.class).getAll();
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("pref", 0);
+                for (Sms sms : smsList) {
+                    SmsListener.sendPOST(sp.getString("urlPost", null), sms, "local", getApplicationContext());
+                }
+
+                List<CallLogLocal> listCallLog = ObjectBox.get().boxFor(CallLogLocal.class).getAll();
+                for (CallLogLocal callLog : listCallLog) {
+                    PhoneCallListener.saveData(getApplicationContext(), callLog.callNumber, callLog.direction, callLog.callDate, callLog.callDuration, callLog, "all");
+                }
+            }
+        }
+
+        @Override
+        public void onLost(@NonNull Network network) {
+            super.onLost(network);
+        }
+    };
 
 }

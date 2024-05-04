@@ -112,4 +112,10 @@
             android:textAlignment="textEnd"
             android:textColor="@color/red" />
     </LinearLayout>
+    <ProgressBar
+        android:id="@+id/loadingSpinner"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_gravity="center"
+        android:visibility="invisible" />
 </LinearLayout>
